@@ -23,10 +23,6 @@
       <dt>Status</dt><dd><span class="pill pill-encrypted">Encrypted &#10003;</span></dd>
       <dt>Key Fingerprint</dt>
       <dd class="mono">{{ active_key.fingerprint[:16].upper() if active_key else "—" }}...</dd>
-      {% if key_evidence %}
-      <dt>Key Preview <span class="muted">(demo mode)</span></dt>
-      <dd class="mono">{{ key_evidence }}</dd>
-      {% endif %}
     </dl>
   </section>
 
@@ -121,7 +117,7 @@
   <div class="table-responsive">
     <table class="key-history-table">
       <thead>
-        <tr><th>Version</th><th>Status</th><th>Fingerprint</th><th>Created</th></tr>
+        <tr><th>Version</th><th>Status</th><th>Encryption Key (Raw Hex)</th><th>Created</th></tr>
       </thead>
       <tbody>
         {% for k in keys %}
@@ -134,7 +130,7 @@
               <span class="pill pill-inactive">INACTIVE</span>
             {% endif %}
           </td>
-          <td class="mono">{{ k.fingerprint[:12].upper() }}...</td>
+          <td class="mono" style="word-break: break-all;">{{ k.raw_key_hex }}</td>
           <td>{{ k.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
         </tr>
         {% endfor %}

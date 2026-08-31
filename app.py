@@ -261,10 +261,6 @@ def file_detail(request: Request, file_id: int, db: Session = Depends(get_db)):
     breakdown = analyze(file_record, active_key)
 
     active_key_bytes = key_manager.load_key(active_key.key_filename) if active_key else None
-    key_evidence = None
-    if DEMO_MODE_SHOW_KEY_EVIDENCE and active_key_bytes:
-        # Educational/demo-mode: show the full key for transparency as requested
-        key_evidence = active_key_bytes.hex().upper()
 
     audit_logs = (
         db.query(AuditLog)
@@ -274,6 +270,11 @@ def file_detail(request: Request, file_id: int, db: Session = Depends(get_db)):
     )
 
     keys = sorted(file_record.keys, key=lambda k: k.version, reverse=True)
+    for k in keys:
+        try:
+            k.raw_key_hex = key_manager.load_key(k.key_filename).hex().upper()
+        except Exception:
+            k.raw_key_hex = "UNAVAILABLE"
 
     status = engine_status()
     feature_importances = None
@@ -292,7 +293,6 @@ def file_detail(request: Request, file_id: int, db: Session = Depends(get_db)):
             "user": user,
             "file": file_record,
             "active_key": active_key,
-            "key_evidence": key_evidence,
             "breakdown": breakdown,
             "audit_logs": audit_logs,
             "keys": keys,
