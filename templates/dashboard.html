@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Your Files</h1>
+  <a href="/upload" class="btn btn-primary">+ Upload File</a>
+</div>
+
+<div class="engine-banner">
+  {% if engine_status.is_ml %}
+    <span class="pill pill-ml">&#129504; ML risk engine active</span>
+    <span class="muted">Random Forest model ({{ engine_status.active_engine }}) is scoring risk for all files below.</span>
+  {% else %}
+    <span class="pill pill-rule">Rule-based risk engine active</span>
+    <span class="muted">Train the ML model with <code>python -m ai.train_model</code> to switch to Random Forest scoring.</span>
+  {% endif %}
+</div>
+
+{% if not files %}
+<div class="empty-state">
+  <p>No files yet. Upload one to see encryption, risk analysis and key rotation in action.</p>
+</div>
+{% else %}
+<div class="table-responsive">
+  <table class="file-table">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Type</th>
+        <th>Algorithm</th>
+        <th>Key Version</th>
+        <th>Risk Score</th>
+        <th>Risk Level</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in files %}
+      <tr>
+        <td>{{ f.original_filename }}</td>
+        <td><span class="pill pill-type">.{{ f.file_type }}</span></td>
+        <td>{{ f.algorithm }}</td>
+        <td><span class="pill pill-version">v{{ f.active_key_version }}</span></td>
+        <td>{{ "%.0f"|format(f.last_risk_score or 0) }}/100</td>
+        <td>
+          {% if f.last_risk_level == "HIGH" %}
+            <span class="pill pill-high">HIGH</span>
+          {% elif f.last_risk_level == "MEDIUM" %}
+            <span class="pill pill-medium">MEDIUM</span>
+          {% else %}
+            <span class="pill pill-low">LOW</span>
+          {% endif %}
+        </td>
+        <td><span class="pill pill-encrypted">Encrypted &#10003;</span></td>
+        <td><a href="/file/{{ f.id }}" class="btn btn-small">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}
